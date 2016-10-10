@@ -8,6 +8,12 @@ from protorpc import messages
 from google.appengine.ext import ndb
 
 
+""" Words to use in the hangman game. """
+WORDS = ("follow", "waking", "insane", "chilly",
+"massive", "ancient", "zebra", "logical", "never", "nice")
+
+GUESSES_ALLOWED = 7
+
 class User(ndb.Model):
     """User profile"""
     name = ndb.StringProperty(required=True)
@@ -16,21 +22,21 @@ class User(ndb.Model):
 
 class Game(ndb.Model):
     """Game object"""
-    target = ndb.IntegerProperty(required=True)
+    target_word = ndb.StringProperty(required=True)
     attempts_allowed = ndb.IntegerProperty(required=True)
     attempts_remaining = ndb.IntegerProperty(required=True, default=5)
     game_over = ndb.BooleanProperty(required=True, default=False)
     user = ndb.KeyProperty(required=True, kind='User')
 
     @classmethod
-    def new_game(cls, user, min, max, attempts):
+    def new_game(cls, user, max, attempts):
         """Creates and returns a new game"""
-        if max < min:
-            raise ValueError('Maximum must be greater than minimum')
+        if max > attempts:
+            raise ValueError('The attempts are greater than the Maximum allowed')
         game = Game(user=user,
-                    target=random.choice(range(1, max + 1)),
-                    attempts_allowed=attempts,
-                    attempts_remaining=attempts,
+                    target_word=random.choice(WORDS),
+                    attempts_allowed=GUESSES_ALLOWED,
+                    attempts_remaining=GUESSES_ALLOWED - attempts,
                     game_over=False)
         game.put()
         return game
@@ -80,12 +86,11 @@ class GameForm(messages.Message):
 class NewGameForm(messages.Message):
     """Used to create a new game"""
     user_name = messages.StringField(1, required=True)
-    min = messages.IntegerField(2, default=1)
-    max = messages.IntegerField(3, default=10)
-    attempts = messages.IntegerField(4, default=5)
+    max = messages.IntegerField(2, default=GUESSES_ALLOWED)
+    attempts = messages.IntegerField(3, default=5)
 
 
-class MakeMoveForm(messages.Message):
+class GuessForm(messages.Message):
     """Used to make a move in an existing game"""
     guess = messages.IntegerField(1, required=True)
 
