@@ -1,7 +1,6 @@
 """models.py - This file contains the class definitions for the Datastore
 entities used by the Game. Because these classes are also regular Python
 classes they can include methods (such as 'to_form' and 'new_game')."""
-
 import random
 from datetime import date
 from protorpc import messages
@@ -23,10 +22,12 @@ class User(ndb.Model):
 class Game(ndb.Model):
     """Game object"""
     target_word = ndb.StringProperty(required=True)
+    word_so_far = ndb.StringProperty(required=True)
     attempts_allowed = ndb.IntegerProperty(required=True)
     attempts_remaining = ndb.IntegerProperty(required=True, default=5)
     game_over = ndb.BooleanProperty(required=True, default=False)
     user = ndb.KeyProperty(required=True, kind='User')
+    past_guesses = ndb.StringProperty(required=True)
 
     @classmethod
     def new_game(cls, user, max, attempts):
@@ -37,7 +38,8 @@ class Game(ndb.Model):
                     target_word=random.choice(WORDS),
                     attempts_allowed=GUESSES_ALLOWED,
                     attempts_remaining=GUESSES_ALLOWED - attempts,
-                    game_over=False)
+                    game_over=False,
+                    past_guesses='')
         game.put()
         return game
 
@@ -48,6 +50,7 @@ class Game(ndb.Model):
         form.user_name = self.user.get().name
         form.attempts_remaining = self.attempts_remaining
         form.game_over = self.game_over
+        form.past_guesses = self.past_guesses
         form.message = message
         return form
 
@@ -82,6 +85,10 @@ class GameForm(messages.Message):
     message = messages.StringField(4, required=True)
     user_name = messages.StringField(5, required=True)
 
+class GameForms(messages.Message):
+    """Return multiple GameForms"""
+    items = messages.MessageField(GameForm, 1, repeated=True)
+
 
 class NewGameForm(messages.Message):
     """Used to create a new game"""
@@ -107,6 +114,18 @@ class ScoreForms(messages.Message):
     """Return multiple ScoreForms"""
     items = messages.MessageField(ScoreForm, 1, repeated=True)
 
+class UserForm(messages.Message):
+    """User Form for outbound User information"""
+    name = messages.StringField(1, required=True)
+    email = messages.StringField(2)
+    wins = messages.IntegerField(3, required=True)
+    total_played = messages.IntegerField(4, required=True)
+    win_percentage = messages.FloatField(5, required=True)
+
+
+class UserForms(messages.Message):
+    """Container for multiple User Forms"""
+    items = messages.MessageField(UserForm, 1, repeated=True)    
 
 class StringMessage(messages.Message):
     """StringMessage-- outbound (single) string message"""

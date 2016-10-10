@@ -50,7 +50,7 @@ class SendGamePausedReminderEmail(webapp2.RequestHandler):
 class UpdateRemainingGuesses(webapp2.RequestHandler):
     def post(self):
         """Update game listing announcement in memcache."""
-        GuessANumberApi._cache_attempts()
+        HangmanApi._cache_attempts()
         self.response.set_status(204)
 
 app = webapp2.WSGIApplication([
