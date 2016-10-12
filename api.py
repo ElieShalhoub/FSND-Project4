@@ -13,7 +13,7 @@ from google.appengine.api import taskqueue
 
 from models import User, Game, Score
 from models import StringMessage, NewGameForm, GameForm, GuessForm,\
-    ScoreForms, ScoreForm, GameForms, UserForm, UserForms
+    ScoreForms, ScoreForm, GameForms, UserForm, UserForms, HighScoresForm
 from utils import get_by_urlsafe
 
 NEW_GAME_REQUEST = endpoints.ResourceContainer(NewGameForm)
