@@ -1,4 +1,5 @@
 #Full Stack Nanodegree Project 4
+#version 1.0 10/12/2016
 
 ## Set-Up Instructions:
 1.  Update the value of application in app.yaml to the app ID you have registered
@@ -157,3 +158,5 @@ Each game can be retrieved or played by using the path parameter
     - Multiple user forms  
  - **StringMessage**
     - General purpose String container.
+
+Creator: Elie Shalhoub

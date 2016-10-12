@@ -1,4 +1,13 @@
 What additional properties did you add to your models and why?
-
+--------------------------------------------------------------------------------
+The following properties were added to the model:
+  1) In the Game model, I have added property for keeping track of game history.
+  2) In the Score model, I have added property for points and remaining guesses calculations.
+  3) the user model was not updated.
 
 What were some of the trade-offs or struggles you faced when implementing the new game logic?
+--------------------------------------------------------------------------------
+
+Mostly the struggle in building the backend was the inability to visual the
+front-end application of the endpoints.  Mostly one would have to imagine how
+these end points would be called and used in from a front end application.
