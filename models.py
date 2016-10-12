@@ -125,7 +125,7 @@ class UserForm(messages.Message):
 
 class UserForms(messages.Message):
     """Container for multiple User Forms"""
-    items = messages.MessageField(UserForm, 1, repeated=True)    
+    items = messages.MessageField(UserForm, 1, repeated=True)
 
 class StringMessage(messages.Message):
     """StringMessage-- outbound (single) string message"""
