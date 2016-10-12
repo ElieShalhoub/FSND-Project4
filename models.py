@@ -101,7 +101,7 @@ class NewGameForm(messages.Message):
 
 
 class GuessForm(messages.Message):
-    """Used to make a move in an existing game"""
+    """Used to make a guess in an existing game"""
     guess = messages.IntegerField(1, required=True)
 
 

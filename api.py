@@ -61,7 +61,7 @@ class HangmanApi(remote.Service):
             raise endpoints.BadRequestException('Maximum letter attempts '
                                                 'has been exceeded!')
 
-        # Use a task queue to update the average attempts remaining.
+        # Use a task queue to update the attempts remaining.
         # This operation is not needed to complete the creation of a new game
         # so it is performed out of sequence.
         taskqueue.add(url='/tasks/cache_attempts')
@@ -80,7 +80,6 @@ class HangmanApi(remote.Service):
         else:
             raise endpoints.NotFoundException('Game not found!')
 
-    #--- Add  main end point ---#
     @endpoints.method(request_message=GUESS_REQUEST,
                       response_message=GameForm,
                       path='game/{urlsafe_game_key}',
@@ -104,12 +103,6 @@ class HangmanApi(remote.Service):
 
         if len(list(request.guess)) > 1:
             raise endpoints.BadRequestException('You can only enter 1 character!')
-
-        # Verify in history that guess has not been guessed before
-#        for (usr , gss, opt) in game.history:
-#            if gss == request.guess:
-#                raise endpoints.BadRequestException('You already guessed that letter!')
-
         # Get guess and place it in game.target_word if correct
         word_guess = ''
         for num in range(0, len(game.target_word)):
@@ -121,14 +114,14 @@ class HangmanApi(remote.Service):
                 if game.attempts_remaining == 1:
                     game.attempts_remaining -= 1
                     message = "You are hanged! Game Over!"
+                    game.end_game(user.key,False)
                 else:
                     game.attempts_remaining -= 1
                     message = "Wrong Guess!"
 
         if word_guess == game.target_word:
-            game.end_game(user.key)
+            game.end_game(user.key, True)
             game.message = "User {} wins".format(request.user_name)
-            #game.history.append(game.message)
             return game.to_form()
 
         game.put()
@@ -172,7 +165,7 @@ class HangmanApi(remote.Service):
                       name='get_attempts_remaining',
                       http_method='GET')
     def get_attempts_remaining(self, request):
-        """Get the cached average moves remaining"""
+        """Get the cached number of moves remaining"""
         return StringMessage(message=memcache.get(MEMCACHE_GUESSES_REMAINING) or '')
 
     #get_user_games
@@ -241,7 +234,7 @@ class HangmanApi(remote.Service):
                                               format(request.game_key))
         games = Game.query(ancestor=game.key).order(Game.start_time)
         return StringMessage(message=[
-            '{},{}'.format(game.player_move, game.result) for game in games])
+            '{}'.format(game.past_guesses) for game in games])
 
     @staticmethod
     def _cache_attempts():
