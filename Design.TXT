@@ -1,0 +1,4 @@
+What additional properties did you add to your models and why?
+
+
+What were some of the trade-offs or struggles you faced when implementing the new game logic?
