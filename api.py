@@ -135,13 +135,13 @@ class HangmanApi(remote.Service):
 
         taskqueue.add(url='/tasks/cache_attempts')
         return game.to_form()
-        # ---- end ------------------
+
     @endpoints.method(response_message=ScoreForms,
                     path='scores',
                     name='get_scores',
                     http_method='GET')
     def get_scores(self, request):
-        """Return all scores"""
+        """Return all scores (unordered)"""
         return ScoreForms(items=[score.to_form() for score in Score.query()])
 
     @endpoints.method(request_message=USER_REQUEST,
@@ -155,6 +155,16 @@ class HangmanApi(remote.Service):
         if not user:
             raise endpoints.NotFoundException('A User with that name does not exist!')
         scores = Score.query(Score.user == user.key)
+        return ScoreForms(items=[score.to_form() for score in scores])
+
+    @endpoints.method(request_message=HighScoresForm,
+                      response_message=ScoreForms,
+                      path='high_scores',
+                      name='get_high_scores',
+                      http_method='GET')
+    def get_high_scores(self, request):
+        """Returns a list of the highest scoring games."""
+        scores = Score.query().order(-Score.points).fetch(limit=request.number_of_results)
         return ScoreForms(items=[score.to_form() for score in scores])
 
     @endpoints.method(response_message=StringMessage,

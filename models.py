@@ -61,7 +61,8 @@ class Game(ndb.Model):
         self.put()
         # Add the game to the score 'board'
         score = Score(user=self.user, date=date.today(), won=won,
-                      guesses=self.attempts_allowed - self.attempts_remaining)
+                      guesses=self.attempts_allowed - self.attempts_remaining,
+                      points = (self.attempts_allowed - self.attempts_remaining)*3)
         score.put()
 
 
@@ -71,10 +72,12 @@ class Score(ndb.Model):
     date = ndb.DateProperty(required=True)
     won = ndb.BooleanProperty(required=True)
     guesses = ndb.IntegerProperty(required=True)
+    points = ndb.IntegerProperty(required=True)
 
     def to_form(self):
         return ScoreForm(user_name=self.user.get().name, won=self.won,
-                         date=str(self.date), guesses=self.guesses)
+                         date=str(self.date), guesses=self.guesses,
+                         points = self.points)
 
 
 class GameForm(messages.Message):
@@ -113,6 +116,10 @@ class ScoreForm(messages.Message):
 class ScoreForms(messages.Message):
     """Return multiple ScoreForms"""
     items = messages.MessageField(ScoreForm, 1, repeated=True)
+
+class HighScoresForm(messages.Message):
+    """Return high scores, with a limit specified by the user."""
+    number_of_results = messages.IntegerField(1, required=False, default=5)
 
 class UserForm(messages.Message):
     """User Form for outbound User information"""
