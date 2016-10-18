@@ -6,11 +6,9 @@ from datetime import date
 from protorpc import messages
 from google.appengine.ext import ndb
 
-
 """ Words to use in the hangman game. """
 WORDS = ("follow", "waking", "insane", "chilly",
-"massive", "ancient", "zebra", "logical", "never", "nice")
-
+        "massive", "ancient", "zebra", "logical", "never", "nice")
 GUESSES_ALLOWED = 7
 
 class User(ndb.Model):
@@ -23,22 +21,22 @@ class Game(ndb.Model):
     """Game object"""
     target_word = ndb.StringProperty(required=True)
     attempts_allowed = ndb.IntegerProperty(required=True)
-    attempts_remaining = ndb.IntegerProperty(required=True, default=5)
+    attempts_remaining = ndb.IntegerProperty(required=True)
     game_over = ndb.BooleanProperty(required=True, default=False)
     user = ndb.KeyProperty(required=True, kind='User')
     past_guesses = ndb.StringProperty(required=True)
 
     @classmethod
-    def new_game(cls, user, max, attempts):
+    def new_game(cls,userKey):
         """Creates and returns a new game"""
-        if max > attempts:
-            raise ValueError('The attempts are greater than the Maximum allowed')
-        game = Game(user=user,
-                    target_word=random.choice(WORDS),
+        word = random.choice(WORDS)
+        past_guesses = "_" * len(word)
+        game = Game(user=userKey,
+                    target_word=word,
                     attempts_allowed=GUESSES_ALLOWED,
-                    attempts_remaining=GUESSES_ALLOWED - attempts,
-                    game_over=False,
-                    past_guesses='')
+                    attempts_remaining=GUESSES_ALLOWED,
+                    past_guesses=past_guesses)
+
         game.put()
         return game
 
@@ -86,6 +84,7 @@ class GameForm(messages.Message):
     game_over = messages.BooleanField(3, required=True)
     message = messages.StringField(4, required=True)
     user_name = messages.StringField(5, required=True)
+    past_guesses = messages.StringField(6, required=True)
 
 class GameForms(messages.Message):
     """Return multiple GameForms"""
@@ -95,9 +94,6 @@ class GameForms(messages.Message):
 class NewGameForm(messages.Message):
     """Used to create a new game"""
     user_name = messages.StringField(1, required=True)
-    max = messages.IntegerField(2, default=GUESSES_ALLOWED)
-    attempts = messages.IntegerField(3, default=5)
-
 
 class GuessForm(messages.Message):
     """Used to make a guess in an existing game"""
