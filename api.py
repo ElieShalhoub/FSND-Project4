@@ -15,11 +15,8 @@ from models import StringMessage, NewGameForm, GameForm, GuessForm,\
 from utils import get_by_urlsafe
 
 NEW_GAME_REQUEST = endpoints.ResourceContainer(NewGameForm)
-GET_GAME_REQUEST = endpoints.ResourceContainer(
-        urlsafe_game_key=messages.StringField(1),)
-GUESS_REQUEST = endpoints.ResourceContainer(
-    GuessForm,
-    urlsafe_game_key=messages.StringField(1),)
+GET_GAME_REQUEST = endpoints.ResourceContainer(urlsafe_game_key=messages.StringField(1))
+GUESS_REQUEST = endpoints.ResourceContainer(GuessForm,urlsafe_game_key=messages.StringField(1))
 USER_REQUEST = endpoints.ResourceContainer(user_name=messages.StringField(1),
                                            email=messages.StringField(2))
 
@@ -51,7 +48,7 @@ class HangmanApi(remote.Service):
         """Creates new game"""
         user = User.query(User.name == request.user_name).get()
         if not user:
-            raise endpoints.NotFoundException('A User with that name does not exist!')
+            raise endpoints.NotFoundException('A user with that name does not exist!')
         game = Game.new_game(user.key)
         # Task queue updates average attempts remaining.
         taskqueue.add(url='/tasks/cache_attempts')
@@ -59,65 +56,16 @@ class HangmanApi(remote.Service):
 
     @endpoints.method(request_message=GET_GAME_REQUEST,
                       response_message=GameForm,
-                      path='game/{urlsafe_game_key}',
-                      name='get_game',
-                      http_method='GET')
+                      path="game/{urlsafe_game_key}",
+                      name="get_game",
+                      http_method="GET")
     def get_game(self, request):
         """Return the current game state."""
         game = get_by_urlsafe(request.urlsafe_game_key, Game)
         if game:
-            return game.to_form('Make a guess!')
+            return game.to_form("Make a guess!")
         else:
-            raise endpoints.NotFoundException('Game not found!')
-
-    @endpoints.method(request_message=GUESS_REQUEST,
-                      response_message=GameForm,
-                      path='game/{urlsafe_game_key}',
-                      name='make_guess',
-                      http_method='PUT')
-    def make_guess(self, request):
-        """Makes a move. Returns a game state with message"""
-        game = get_by_urlsafe(request.urlsafe_game_key, Game)
-        if not game:
-            raise endpoints.NotFoundException('Game not found!')
-        if game.game_over:
-            raise endpoints.NotFoundException('Game already over!')
-
-        # Get user name
-        user = User.query(User.name == request.user_name).get()
-
-        # Check user is valid
-        if not user:
-            raise endpoints.NotFoundException('User not found!')
-        # Verify user has moves left
-
-        if len(list(request.guess)) > 1:
-            raise endpoints.BadRequestException('You can only enter 1 character!')
-        # Get guess and place it in game.target_word if correct
-        word_guess = ''
-        for num in range(0, len(game.target_word)):
-            if request.guess in str(game.target_word[num]):
-                word_guess = replaceCharacterAtIndexInString(word_guess,num,request.guess)
-                message = "You Guessed Right!"
-                # If incorrect down one counter on attempts_remaining
-            elif request.guess not in str(game.target_word):
-                if game.attempts_remaining == 1:
-                    game.attempts_remaining -= 1
-                    message = "You are hanged! Game Over!"
-                    game.end_game(user.key,False)
-                else:
-                    game.attempts_remaining -= 1
-                    message = "Wrong Guess!"
-
-        if word_guess == game.target_word:
-            game.end_game(user.key, True)
-            game.message = "User {} wins".format(request.user_name)
-            return game.to_form()
-
-        game.put()
-
-        taskqueue.add(url='/tasks/cache_attempts')
-        return game.to_form()
+            raise endpoints.NotFoundException("Game not found!")
 
     @endpoints.method(response_message=ScoreForms,
                     path='scores',

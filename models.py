@@ -25,20 +25,32 @@ class Game(ndb.Model):
     game_over = ndb.BooleanProperty(required=True, default=False)
     user = ndb.KeyProperty(required=True, kind='User')
     past_guesses = ndb.StringProperty(required=True)
+    word_state = ndb.StringProperty(required=True)
 
     @classmethod
     def new_game(cls,userKey):
         """Creates and returns a new game"""
         word = random.choice(WORDS)
-        past_guesses = "_" * len(word)
+        word_state = "_" * len(word)
+        past_guesses = " "
         game = Game(user=userKey,
                     target_word=word,
                     attempts_allowed=GUESSES_ALLOWED,
                     attempts_remaining=GUESSES_ALLOWED,
-                    past_guesses=past_guesses)
+                    past_guesses = past_guesses,
+                    word_state=word_state)
 
         game.put()
         return game
+
+    def save_history(self, guess, message, order):
+		"""Saves the last made move to history"""
+		move = History(parent=self.key,
+					   guess=guess,
+					   message=message,
+					   order=order)
+		move.put()
+		return move
 
     def to_form(self, message):
         """Returns a GameForm representation of the Game"""
@@ -47,11 +59,11 @@ class Game(ndb.Model):
         form.user_name = self.user.get().name
         form.attempts_remaining = self.attempts_remaining
         form.game_over = self.game_over
-        form.past_guesses = self.past_guesses
+        form.word_state = self.word_state
         form.message = message
         return form
 
-    def end_game(self, won=False):
+    def end_game(self, won=False,score=0):
         """Ends the game - if won is True, the player won. - if won is False,
         the player lost."""
         self.game_over = True
@@ -84,7 +96,7 @@ class GameForm(messages.Message):
     game_over = messages.BooleanField(3, required=True)
     message = messages.StringField(4, required=True)
     user_name = messages.StringField(5, required=True)
-    past_guesses = messages.StringField(6, required=True)
+    word_state = messages.StringField(6, required=True)
 
 class GameForms(messages.Message):
     """Return multiple GameForms"""
@@ -97,7 +109,7 @@ class NewGameForm(messages.Message):
 
 class GuessForm(messages.Message):
     """Used to make a guess in an existing game"""
-    guess = messages.IntegerField(1, required=True)
+    guess = messages.StringField(1, required=True)
 
 
 class ScoreForm(messages.Message):
@@ -124,6 +136,26 @@ class UserForm(messages.Message):
     total_played = messages.IntegerField(4, required=True)
     win_percentage = messages.FloatField(5, required=True)
 
+class History(ndb.Model):
+	"""Object representing a past guess and result"""
+	guess = ndb.StringProperty(required=True)
+	message = ndb.StringProperty(required=True)
+	order = ndb.IntegerProperty(required=True)
+
+	def to_form(self):
+		form = HistoryForm()
+		form.guess = self.guess
+		form.message = self.message
+		return form
+
+class HistoryForm(messages.Message):
+	"""Form for outbound History information"""
+	guess = messages.StringField(1, required=True)
+	message = messages.StringField(2, required=True)
+
+class HistoryForms(messages.Message):
+	"""Returns multiple HistoryForms"""
+	items = messages.MessageField(HistoryForm, 1, repeated=True)
 
 class UserForms(messages.Message):
     """Container for multiple User Forms"""
