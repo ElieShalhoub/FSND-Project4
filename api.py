@@ -54,6 +54,58 @@ class HangmanApi(remote.Service):
         taskqueue.add(url='/tasks/cache_attempts')
         return game.to_form("A New Hangman Game Has Been Created!")
 
+    @endpoints.method(request_message=GUESS_REQUEST,
+                      response_message=GameForm,
+                      path="game/{urlsafe_game_key}/letter",
+                      name="make_guess",
+                      http_method="PUT")
+    def make_guess(self, request):
+        """Makes a move. Returns a game state with message"""
+        game = get_by_urlsafe(request.urlsafe_game_key, Game)
+        if game:
+            if game.game_over:
+                return game.to_form("Game is already over!")
+            else:
+                raise endpoints.NotFoundException("Game not found. Start a new game!")
+            if not request.guess:
+                return game.to_form("Please guess a letter.")
+            if request.guess.lower() in game.past_guesses:
+                return game.to_form("You already guessed that letter!")
+            if len(request.guess) != 1:
+                return game.to_form("You can only guess a single letter.")
+
+            # Assess the guessed letter
+            game.past_guesses.append(request.guess.lower())
+            move_number = len(game.past_guesses)
+            if request.guess.lower() in game.target_word.lower():
+                guess_instances = [i for i, ltr in enumerate(game.target_word.lower()) if ltr == request.guess.lower()]
+                for i in guess_instances:
+                    game.word_state = game.word_state[:i] + game.target_word[i] + game.word_state[i+1:]
+                if game.word_state == game.target_word:
+                    # 1 point for guessing final letter
+                    message = "You won! Score is 1."
+                    game.save_history(request.guess, message, move_number)
+                    game.end_game(True, 1)
+                    return game.to_form(message)
+                else:
+                    message = "Correct guess! Word so far: " + game.word_state
+                    game.save_history(request.guess, message, move_number)
+                    game.put()
+                    return game.to_form(message)
+            else:
+                game.attempts_remaining -= 1
+                if game.attempts_remaining < 1:
+                    # 0 points for loss
+                    message = "Game over! Score is 0. Correct word is: " + game.target_word
+                    game.save_history(request.guess, message, move_number)
+                    game.end_game(False, 0)
+                    return game.to_form(message)
+                else:
+                    message = "Incorrect guess! Word so far: " + game.word_state
+                    game.save_history(request.guess, message, move_number)
+                    game.put()
+                    return game.to_form(message)
+
     @endpoints.method(request_message=GET_GAME_REQUEST,
                       response_message=GameForm,
                       path="game/{urlsafe_game_key}",
