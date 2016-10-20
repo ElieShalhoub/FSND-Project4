@@ -12,6 +12,7 @@ from models import User
 
 
 class SendReminderEmail(webapp2.RequestHandler):
+
     def get(self):
         """Send a reminder email to each User with an email about games.
         Called every 24 hours using a cron job"""
@@ -29,6 +30,7 @@ class SendReminderEmail(webapp2.RequestHandler):
 
 
 class SendGamePausedReminderEmail(webapp2.RequestHandler):
+
     def get(self):
         """Send a reminder email to each User with paused hangman matches.
         Called every hour using a cron job"""
@@ -48,6 +50,7 @@ class SendGamePausedReminderEmail(webapp2.RequestHandler):
 
 
 class UpdateRemainingGuesses(webapp2.RequestHandler):
+
     def post(self):
         """Update game listing announcement in memcache."""
         HangmanApi._cache_attempts()

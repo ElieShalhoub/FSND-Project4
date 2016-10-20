@@ -1,17 +1,16 @@
-#Full Stack Nanodegree Project 4
-#version 1.0 10/12/2016
+# Full Stack Nanodegree Project 4
+# version 1.0 10/12/2016
 
-## Set-Up Instructions:
+# Set-Up Instructions:
 1.  Update the value of application in app.yaml to the app ID you have registered
  in the App Engine admin console and would like to use to host your instance of this sample.
 1.  Run the app with the devserver using dev_appserver.py DIR, and ensure it's
- running by visiting the API Explorer - by default localhost:8080/_ah/api/explorer.
+ running by visiting the API Explorer - by default localhost: 8080 / _ah / api / explorer.
 1.  (Optional) Generate your client library(ies) with the endpoints tool.
  Deploy your application.
 
 
-
-##Game Description:
+# Game Description:
 Hangman is a simple guessing game. Each game begins with a randomly selected
 word from a predefined list of words.  The user attempts to guess the word
 one letter at a time.  If the guessed is a letter that is in the target word,
@@ -22,7 +21,7 @@ number of remaining attempts multiplied by 3.
 Each game can be retrieved or played by using the path parameter
 `urlsafe_game_key`.
 
-##Files Included:
+# Files Included:
  - api.py: Contains endpoints and game playing logic.
  - app.yaml: App configuration.
  - cron.yaml: Cronjob configuration.
@@ -30,11 +29,11 @@ Each game can be retrieved or played by using the path parameter
  - models.py: Entity and message definitions including helper methods.
  - utils.py: Helper function for retrieving ndb.Models by urlsafe Key string.
 
-##Endpoints Included:
+# Endpoints Included:
  - **create_user**
     - Path: 'user'
     - Method: POST
-    - Parameters: user_name, email (optional)
+    - Parameters: user_name, email(optional)
     - Returns: Message confirming creation of the User.
     - Description: Creates a new User. user_name provided must be unique. Will
     raise a ConflictException if a User with that user_name already exists.
@@ -124,7 +123,7 @@ Each game can be retrieved or played by using the path parameter
 
 
 
-##Models Included:
+# Models Included:
  - **User**
     - Stores unique user_name and email address.
 
@@ -134,7 +133,7 @@ Each game can be retrieved or played by using the path parameter
  - **Score**
     - Records completed games. Associated with Users model via KeyProperty.
 
-##Forms Included:
+# Forms Included:
  - **GameForm**
     - Representation of a Game's state (urlsafe_key, attempts_remaining,
     game_over flag, message, user_name).
