@@ -16,7 +16,6 @@ class User(ndb.Model):
     """User profile"""
     name = ndb.StringProperty(required=True)
     email = ndb.StringProperty()
-    total_score = ndb.IntegerProperty(default=0)
 
     def to_form(self, total_score):
         form = UserForm()
@@ -141,7 +140,7 @@ class HighScoresForm(messages.Message):
 class UserForm(messages.Message):
     """User Form for outbound User information"""
     user_name = messages.StringField(1, required=True)
-    total_score = messages.FloatField(2, required=True)
+    total_score = messages.IntegerField(2, required=True)
 
 
 class History(ndb.Model):

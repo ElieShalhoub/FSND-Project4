@@ -212,8 +212,14 @@ class HangmanApi(remote.Service):
                       http_method='GET')
     def get_user_rankings(self, request):
         """Return list of Users in descending order of score"""
-        users = User.query().order(-User.total_score).fetch()
-        return UserForms(items=[user.to_form() for user in users])
+        rankings = []
+        users = User.query().fetch()
+        for user in users:
+			user_score = Score.query(ancestor=user.key)
+			total_score = sum([score.points for score in user_score])
+			rankings.append((user, total_score))
+        rankings.sort(key=lambda tup: tup[1], reverse=True)
+        return UserForms(items=[result[0].to_form(result[1]) for result in rankings])
 
     # get game history
     @endpoints.method(request_message=GET_GAME_REQUEST,
