@@ -11,7 +11,8 @@ from google.appengine.api import taskqueue
 
 from models import User, Game, Score
 from models import StringMessage, NewGameForm, GameForm, GuessForm,\
-    ScoreForms, ScoreForm, GameForms, UserForm, UserForms, HighScoresForm
+    ScoreForms, ScoreForm, GameForms, UserForm, UserForms, HighScoresForm,\
+    HistoryForms, History
 from utils import get_by_urlsafe
 
 NEW_GAME_REQUEST = endpoints.ResourceContainer(NewGameForm)
@@ -169,18 +170,17 @@ class HangmanApi(remote.Service):
     # Hint: it might make sense for each game to be a descendant of a User.
     @endpoints.method(request_message=USER_REQUEST,
                       response_message=GameForms,
-                      path='user/games',
-                      name='get_user_games',
-                      http_method='GET')
+                      path="user/games/{user_name}",
+                      name="get_user_games",
+                      http_method="GET")
     def get_user_games(self, request):
-        """Returns all of an individual incomplete games"""
+        """Returns all games for user"""
         user = User.query(User.name == request.user_name).get()
         if not user:
             raise endpoints.NotFoundException(
                 'A User with that name does not exist!')
-        games = Game.query(ndb.AND(Game.is_active == True,
-                                   Game.user == user.key)).fetch()
-        return GameForms(items=[game.to_form() for game in games])
+        games = Game.query(Game.user == user.key).fetch()
+        return GameForms(items=[game.to_form("") for game in games])
 
     # cancel_game
     # This endpoint allows users to cancel a game in progress.
@@ -212,36 +212,34 @@ class HangmanApi(remote.Service):
                       http_method='GET')
     def get_user_rankings(self, request):
         """Return list of Users in descending order of score"""
-        users = User.query().order(-User.score).fetch()
+        users = User.query().order(-User.total_score).fetch()
         return UserForms(items=[user.to_form() for user in users])
 
     # get game history
     @endpoints.method(request_message=GET_GAME_REQUEST,
-                      response_message=StringMessage,
+                      response_message=HistoryForms,
                       path='game/{urlsafe_game_key}/history',
                       name='get_game_history',
                       http_method='GET')
     def get_game_history(self, request):
-        """Return list of Game plays"""
-
-        game = get_by_urlsafe(request.game_key, Game)
+        """Returns a history of all guesses made in game."""
+        game = get_by_urlsafe(request.urlsafe_game_key, Game)
         if not game:
             raise endpoints.ConflictException('Cannot find game with key {}'.
-                                              format(request.game_key))
-        games = Game.query(ancestor=game.key).order(Game.start_time)
-        return StringMessage(message=[
-            '{}'.format(game.past_guesses) for game in games])
+                                              format(request.urlsafe_game_key))
+        else:
+            history = History.query(ancestor=game.key).order(History.order)
+            return HistoryForms(items=[guess.to_form() for guess in history])
 
     @staticmethod
     def _cache_attempts():
-        """Populates memcache with the average moves remaining of Games"""
+        """Populates memcache with the remaining number of Guesses"""
         games = Game.query(Game.game_over == False).fetch()
         if games:
             count = len(games)
             total_attempts_remaining = sum([game.attempts_remaining
                                             for game in games])
-            average = float(total_attempts_remaining) / count
             memcache.set(MEMCACHE_GUESSES_REMAINING,
-                         'The average moves remaining is {:.2f}'.format(average))
+                         'The number of remaining guesses is {}'.format(total_attempts_remaining))
 
 api = endpoints.api_server([HangmanApi])

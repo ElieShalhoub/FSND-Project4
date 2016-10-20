@@ -16,6 +16,7 @@ class User(ndb.Model):
     """User profile"""
     name = ndb.StringProperty(required=True)
     email = ndb.StringProperty()
+    total_score = ndb.IntegerProperty(default=0)
 
     def to_form(self, total_score):
         form = UserForm()
@@ -93,7 +94,6 @@ class Score(ndb.Model):
                          date=str(self.date), guesses=self.guesses,
                          points=self.points)
 
-
 class GameForm(messages.Message):
     """GameForm for outbound game state information"""
     urlsafe_key = messages.StringField(1, required=True)
@@ -125,6 +125,7 @@ class ScoreForm(messages.Message):
     date = messages.StringField(2, required=True)
     won = messages.BooleanField(3, required=True)
     guesses = messages.IntegerField(4, required=True)
+    points = messages.IntegerField(5, required=True)
 
 
 class ScoreForms(messages.Message):
