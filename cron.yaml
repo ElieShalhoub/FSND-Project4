@@ -1,7 +1,7 @@
 cron:
-- description: Send a reminder email to all users
+- description: Send a reminder email to all users every other day
   url: /crons/send_reminder
-  schedule: every 24 hours
+  schedule: every 48 hours
 
 - description: Send a reminder for every paused game
   url: /crons/send_Paused_Game_Reminder

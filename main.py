@@ -38,7 +38,7 @@ class SendGamePausedReminderEmail(webapp2.RequestHandler):
         users = User.query(User.email != None)
 
         for user in users:
-            games = Game.query(Game.is_active == True).fetch()
+            games = Game.query(Game.game_over == False).fetch()
 
             if games:
                 subject = 'Paused match reminder!'
