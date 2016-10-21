@@ -77,6 +77,8 @@ class HangmanApi(remote.Service):
                 return game.to_form("You already guessed that letter!")
             if len(request.guess) != 1:
                 return game.to_form("You can only guess a single letter.")
+            if not request.guess.isalpha():
+                return game.to_form("You should guess a letter from the alphabet!")
             # Assess the guessed letter
             game.past_guesses.append(request.guess.lower())
             move_number = len(game.past_guesses)
@@ -239,7 +241,7 @@ class HangmanApi(remote.Service):
 
     @staticmethod
     def _cache_attempts():
-        """Populates memcache with the remaining number of Guesses for all
+        """Populates memcache with the total remaining number of guesses for all
         incomplete games."""
         games = Game.query(Game.game_over == False).fetch()
         if games:
