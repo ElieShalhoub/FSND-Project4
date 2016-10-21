@@ -19,3 +19,15 @@ indexes:
   ancestor: yes
   properties:
   - name: order
+
+- kind: Score
+  properties:
+  - name: user
+  - name: points
+    direction: desc
+
+- kind: Score
+  ancestor: yes
+  properties:
+  - name: points
+    direction: desc

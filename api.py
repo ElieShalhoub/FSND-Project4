@@ -211,13 +211,13 @@ class HangmanApi(remote.Service):
                       name='get_user_rankings',
                       http_method='GET')
     def get_user_rankings(self, request):
-        """Return list of Users in descending order of score"""
+        """Return list of users ranked in descending order of total score"""
         rankings = []
         users = User.query().fetch()
         for user in users:
-			user_score = Score.query(ancestor=user.key)
-			total_score = sum([score.points for score in user_score])
-			rankings.append((user, total_score))
+            user_score = Score.query(Score.user==user.key).order(-Score.points).fetch()
+            total_score = sum([score.points for score in user_score])
+            rankings.append((user,total_score))
         rankings.sort(key=lambda tup: tup[1], reverse=True)
         return UserForms(items=[result[0].to_form(result[1]) for result in rankings])
 
@@ -239,7 +239,8 @@ class HangmanApi(remote.Service):
 
     @staticmethod
     def _cache_attempts():
-        """Populates memcache with the remaining number of Guesses"""
+        """Populates memcache with the remaining number of Guesses for all
+        incomplete games."""
         games = Game.query(Game.game_over == False).fetch()
         if games:
             count = len(games)
