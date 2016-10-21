@@ -41,7 +41,7 @@ Each game can be retrieved or played by using the path parameter
   - **new_game**
     - Path: 'game'
     - Method: POST
-    - Parameters: user_name, max, attempts
+    - Parameters: userKey
     - Returns: GameForm with initial game state.
     - Description: Creates a new Game. user_name provided must correspond to an
     existing user - will raise a NotFoundException if not. Maximum guess attempts
