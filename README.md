@@ -15,8 +15,9 @@ Hangman is a simple guessing game. Each game begins with a randomly selected
 word from a predefined list of words.  The user attempts to guess the word
 one letter at a time.  If the guessed is a letter that is in the target word,
 the user proceeds and guesses another, if it is not start drawing a hangman.
-A total of 7 wrong attempts is allowed.  The score after each is stored as the
-number of remaining attempts multiplied by 3.
+A total of 7 wrong attempts is allowed.  The user's scores 3 points when he/she
+guess the word, and 0 otherwise.  The user ranking is ultimately defined by the
+total points accumulated from the games they played
 
 Each game can be retrieved or played by using the path parameter
 `urlsafe_game_key`.
@@ -44,9 +45,19 @@ Each game can be retrieved or played by using the path parameter
     - Parameters: userKey
     - Returns: GameForm with initial game state.
     - Description: Creates a new Game. user_name provided must correspond to an
-    existing user - will raise a NotFoundException if not. Maximum guess attempts
-    should not be exceeded. Also adds a task to a task queue to update the
-    moves remaining for active games.
+    existing user - will raise a NotFoundException if not.
+
+  - **make_guess**
+    - Path: 'game/{urlsafe_game_key}'
+    - Method: PUT
+    - Parameters: urlsafe_game_key, guess
+    - Returns: GameForm with new game state.
+    - Description: Accepts a 'guess' and returns the updated state of the game.
+      Reveals the letters that users has correctly guessed one guess at a time.
+     If the user's guess causes a game to end, a corresponding Score entity will be created.
+     A score of 0 is awarded when the user fails to guess the word, and is hanged, and a score
+     of 3 is awarded when the user manages to guess the word.
+
 
  - **get_game**
     - Path: 'game/{urlsafe_game_key}'
@@ -55,13 +66,6 @@ Each game can be retrieved or played by using the path parameter
     - Returns: GameForm with current game state.
     - Description: Returns the current state of a game.
 
- - **make_guess**
-    - Path: 'game/{urlsafe_game_key}'
-    - Method: PUT
-    - Parameters: urlsafe_game_key, guess
-    - Returns: GameForm with new game state.
-    - Description: Accepts a 'guess' and returns the updated state of the game.
-    If this causes a game to end, a corresponding Score entity will be created.
 
  - **get_scores**
     - Path: 'scores'
@@ -112,6 +116,8 @@ Each game can be retrieved or played by using the path parameter
        - Parameters: None
        - Returns: UserForms
        - Description: Returns a list of Users in descending order of score.
+       The score is measured as the total points that a user gained from
+       all the games he played.
 
 - **get_game_history**
               - Path: 'game/{urlsafe_game_key}/history''
@@ -132,6 +138,9 @@ Each game can be retrieved or played by using the path parameter
 
  - **Score**
     - Records completed games. Associated with Users model via KeyProperty.
+
+- **History**
+  - Records user's past guesses and results
 
 # Forms Included:
  - **GameForm**
@@ -155,7 +164,12 @@ Each game can be retrieved or played by using the path parameter
       winning percentage )
 - **UserForms**
     - Multiple user forms  
- - **StringMessage**
+- **HistoryForm**
+   - Form for outbound History information
+- **HistoryForms**
+  - Container for multiple history forms  
+
+- **StringMessage**
     - General purpose String container.
 
 Creator: Elie Shalhoub
