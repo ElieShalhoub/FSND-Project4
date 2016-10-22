@@ -90,7 +90,7 @@ class HangmanApi(remote.Service):
                         :i] + game.target_word[i] + game.word_state[i + 1:]
                 if game.word_state == game.target_word:
                     # 1 point for guessing final letter
-                    message = "You won! Score is 1."
+                    message = "You won! Score is 1. The word is: " + game.target_word
                     game.save_history(request.guess, message, move_number)
                     game.end_game(True, 1)
                     return game.to_form(message)
