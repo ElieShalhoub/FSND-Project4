@@ -1,3 +1,6 @@
-2016/10/20-23:22:59.357 58371 Reusing MANIFEST /Users/elieshalhoub/Desktop/P4-HANGMAN-GIT-SUBMIT/FSND-Project4/test/Default/Session Storage/MANIFEST-000001
-2016/10/20-23:22:59.357 58371 Recovering log #16
-2016/10/20-23:22:59.358 58371 Reusing old log /Users/elieshalhoub/Desktop/P4-HANGMAN-GIT-SUBMIT/FSND-Project4/test/Default/Session Storage/000016.log 
+2016/10/20-23:25:02.842 58371 Reusing MANIFEST /Users/elieshalhoub/Desktop/P4-HANGMAN-GIT-SUBMIT/FSND-Project4/test/Default/Session Storage/MANIFEST-000001
+2016/10/20-23:25:02.843 58371 Recovering log #16
+2016/10/20-23:25:02.843 58371 Reusing old log /Users/elieshalhoub/Desktop/P4-HANGMAN-GIT-SUBMIT/FSND-Project4/test/Default/Session Storage/000016.log 
+2016/10/21-00:43:20.591 17483 Level-0 table #21: started
+2016/10/21-00:43:20.596 17483 Level-0 table #21: 32827 bytes OK
+2016/10/21-00:43:20.598 17483 Delete type=0 #16
