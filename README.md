@@ -15,9 +15,10 @@ Hangman is a simple guessing game. Each game begins with a randomly selected
 word from a predefined list of words.  The user attempts to guess the word
 one letter at a time.  If the guessed is a letter that is in the target word,
 the user proceeds and guesses another, if it is not start drawing a hangman.
-A total of 7 wrong attempts is allowed.  The user's scores 3 points when he/she
-guess the word, and 0 otherwise.  The user ranking is ultimately defined by the
-total points accumulated from the games they played
+A total of 7 wrong attempts is allowed.  The user's score from each game is the
+number of attempts remaing when he has correctly guessed the work, and 0 otherwise.  
+The user ranking is ultimately defined by the total points accumulated from the
+games played.
 
 Each game can be retrieved or played by using the path parameter
 `urlsafe_game_key`.
@@ -56,7 +57,7 @@ Each game can be retrieved or played by using the path parameter
       Reveals the letters that users has correctly guessed one guess at a time.
      If the user's guess causes a game to end, a corresponding Score entity will be created.
      A score of 0 is awarded when the user fails to guess the word, and is hanged, and a score
-     of 3 is awarded when the user manages to guess the word.
+     of numnber of attempts remaing is awarded when the user manages to guess the word.
 
 
  - **get_game**
